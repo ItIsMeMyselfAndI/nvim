@@ -1,0 +1,8 @@
+require("plugins.configs.tokyonight")
+require("plugins.configs.guess-indent")
+require("plugins.configs.gitsign")
+require("plugins.configs.mini-pick")
+require("plugins.configs.oil")
+require("plugins.configs.copilot-chat")
+require("plugins.configs.render-markdown")
+require("plugins.configs.blink")

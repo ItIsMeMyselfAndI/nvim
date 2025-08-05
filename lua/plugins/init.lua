@@ -1,0 +1,15 @@
+vim.pack.add({
+    { src = 'https://github.com/NMAC427/guess-indent.nvim' },
+    { src = 'https://github.com/folke/tokyonight.nvim' },
+    { src = 'https://github.com/lewis6991/gitsigns.nvim' },
+    { src = 'https://github.com/echasnovski/mini.pick' },
+    { src = 'https://github.com/stevearc/oil.nvim' },
+    { src = 'https://github.com/nvim-lua/plenary.nvim' },
+    { src = 'https://github.com/CopilotC-Nvim/CopilotChat.nvim' },
+    { src = 'https://github.com/github/copilot.vim' },
+    { src = 'https://github.com/tree-sitter-grammars/tree-sitter-markdown' },
+    { src = 'https://github.com/MeanderingProgrammer/render-markdown.nvim' },
+    { src = 'https://github.com/ThePrimeagen/vim-be-good' },
+    { src = 'https://github.com/Saghen/blink.cmp' },
+    { src = 'https://github.com/rafamadriz/friendly-snippets' },
+})
