@@ -36,93 +36,93 @@ vim.o.winborder = "rounded"
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
-	local lazyrepo = "https://github.com/folke/lazy.nvim.git"
-	local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
-	if vim.v.shell_error ~= 0 then
-		vim.api.nvim_echo({
-			{ "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-			{ out, "WarningMsg" },
-			{ "\nPress any key to exit..." },
-		}, true, {})
-		vim.fn.getchar()
-		os.exit(1)
-	end
+    local lazyrepo = "https://github.com/folke/lazy.nvim.git"
+    local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
+    if vim.v.shell_error ~= 0 then
+        vim.api.nvim_echo({
+            { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
+            { out, "WarningMsg" },
+            { "\nPress any key to exit..." },
+        }, true, {})
+        vim.fn.getchar()
+        os.exit(1)
+    end
 end
 vim.opt.rtp:prepend(lazypath)
 
 local plugins = {
-	{
-		"folke/tokyonight.nvim",
-		lazy = false,
-		priority = 1000,
-		opts = {},
-		config = function()
-			vim.cmd[[colorscheme tokyonight-night]]
-		end
-	},
-	{
-		"stevearc/oil.nvim",
-		opts = {},
-		dependencies = { { "echasnovski/mini.icons", opts = {} } },
-		lazy = true,
-		config = function()
-			require("oil").setup({
-				columns = { "icon" },
-				win_options = {
-					wrap = false,
-					number = false,
-					relativenumber = false,
-					signcolumn = "no",
-					cursorline = true,
-				},
-				view_options = { show_hidden = true },
-			})
-		end
-	},
-	{
-		"lewis6991/gitsigns.nvim",
-		config = function()
-			require("gitsigns").setup({
-				signs = {
-					add = { text = '+' },
-					change = { text = '~' },
-					delete = { text = '_' },
-					topdelete = { text = '‾' },
-					changedelete = { text = '~' },
-				},
-			})
-		end
-	},
-	{
-		"nvim-treesitter/nvim-treesitter",
-		branch = 'master',
-		lazy = false,
-		build = ":TSUpdate",
-		config = function()
-			require('nvim-treesitter.configs').setup({
-				ensure_installed = {
-					"bash", "c", "cpp", "css", "diff", "dockerfile",
-					"git_config", "git_rebase", "gitattributes", "gitcommit",
-					"go", "html", "javascript", "json", "json5",
-					"lua", "markdown", "markdown_inline", "python",
-					"regex", "rust", "scss", "sql",
-					"toml", "typescript", "vimdoc", "yaml"
-				},
-				sync_install = false,
-				ignore_install = {},
-				auto_install = true,
-				highlight = {
-					enable = true,
-					additional_vim_regex_highlighting = false,
-				},
-			})
-		end
-	},
-	{
-		"MeanderingProgrammer/render-markdown.nvim",
-		config = function()
-			require('render-markdown').setup({
-				completions = { lsp = { enabled = true } },
+    {
+        "folke/tokyonight.nvim",
+        lazy = false,
+        priority = 1000,
+        opts = {},
+        config = function()
+            vim.cmd[[colorscheme tokyonight-night]]
+        end
+    },
+    {
+        "stevearc/oil.nvim",
+        opts = {},
+        dependencies = { { "echasnovski/mini.icons", opts = {} } },
+        lazy = true,
+        config = function()
+            require("oil").setup({
+                columns = { "icon" },
+                win_options = {
+                    wrap = false,
+                    number = false,
+                    relativenumber = false,
+                    signcolumn = "no",
+                    cursorline = true,
+                },
+                view_options = { show_hidden = true },
+            })
+        end
+    },
+    {
+        "lewis6991/gitsigns.nvim",
+        config = function()
+            require("gitsigns").setup({
+                signs = {
+                    add = { text = '+' },
+                    change = { text = '~' },
+                    delete = { text = '_' },
+                    topdelete = { text = '‾' },
+                    changedelete = { text = '~' },
+                },
+            })
+        end
+    },
+    {
+        "nvim-treesitter/nvim-treesitter",
+        branch = 'master',
+        lazy = false,
+        build = ":TSUpdate",
+        config = function()
+            require('nvim-treesitter.configs').setup({
+                ensure_installed = {
+                    "bash", "c", "cpp", "css", "diff", "dockerfile",
+                    "git_config", "git_rebase", "gitattributes", "gitcommit",
+                    "go", "html", "javascript", "json", "json5",
+                    "lua", "markdown", "markdown_inline", "python",
+                    "regex", "rust", "scss", "sql",
+                    "toml", "typescript", "vimdoc", "yaml"
+                },
+                sync_install = false,
+                ignore_install = {},
+                auto_install = true,
+                highlight = {
+                    enable = true,
+                    additional_vim_regex_highlighting = false,
+                },
+            })
+        end
+    },
+    {
+        "MeanderingProgrammer/render-markdown.nvim",
+        config = function()
+            require('render-markdown').setup({
+                completions = { lsp = { enabled = true } },
                 file_types = { "markdown", "copilot-chat", "nvim-pack://6/confirm-update" },
             })
         end
@@ -164,23 +164,96 @@ local plugins = {
                         },
                         workspace = {
                             checkThirdParty = false,
-                            library = { vim.env.VIMRUNTIME }
-                            -- library = vim.api.nvim_get_runtime_file("", true),
+                            -- library = { vim.env.VIMRUNTIME }
+                            library = vim.api.nvim_get_runtime_file("", true),
                         },
                     },
                 },
             })
         end
-    } ,
+    },
+    {
+        "CopilotC-Nvim/CopilotChat.nvim",
+        dependencies = {
+            { "nvim-lua/plenary.nvim", branch = "master" },
+        },
+        build = "make tiktoken",
+        config = function()
+            require("CopilotChat").setup({
+                window = {
+                    layout = 'vertical',
+                    width = 0.3,
+                    border = 'rounded',
+                    title = 'Copilot Chat',
+                },
+                headers = {
+                    user = '  User ',
+                    assistant = '  Copilot ',
+                    error = '  Error ',
+                    tool = '🛠 Tool: ',
+                },
+                context = "buffers",
+                highlight_selection = true,
+                separator = '━━',
+                show_folds = false,
+            })
+        end
+    },
 }
 
 require("lazy").setup({
     spec = {
-        plugins
-		-- { import = plugins },
-	},
-	install = { colorscheme = { "tokyonight-night" } },
-	checker = { enabled = true },
+        plugins,
+        -- { import = plugins },
+    },
+    install = { colorscheme = { "tokyonight-night" } },
+    checker = { enabled = true },
 })
 
+local win = "copilot-chat"
+local function get_filename()
+    local project_dir = vim.fn.expand('%:p:h')
+    if project_dir == "/" then
+        project_dir = "_"
+    elseif project_dir == "" then
+        project_dir = "unknown"
+    end
+    local filename = string.gsub(project_dir, "/", "_")
+    if filename == "" or "/" then
+        filename = "_"
+    end
+    return filename
+end
+local function save_convo()
+    local filename = get_filename()
+    if vim.bo.filetype == win then
+        vim.cmd("CopilotChatSave " .. filename)
+    end
+end
+local function load_convo()
+    vim.defer_fn(function()
+        if vim.bo.filetype == win then
+            local filename = get_filename()
+            local cmd = "CopilotChatLoad " .. filename
+            vim.notify(":" .. cmd, vim.log.levels.INFO)
+            vim.cmd(cmd)
+        end
+    end, 3000)
+end
+vim.api.nvim_create_autocmd(
+    { 'ModeChanged' },
+    { pattern = "i:*", callback = save_convo }
+)
+vim.api.nvim_create_autocmd(
+    {
+        'QuitPre', 'ExitPre', 'VimLeavePre',
+        'WinClosed', 'TabClosed', 'BufDelete',
+        'SourcePre', 'BufWritePost'
+    },
+    { callback = save_convo }
+)
+vim.api.nvim_create_autocmd(
+    { 'BufWinEnter',},
+    { callback = load_convo }
+)
 vim.lsp.enable(SERVERS)
