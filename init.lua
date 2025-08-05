@@ -1,40 +1,15 @@
+require("options")
 vim.g.mapleader = " "
 
-vim.o.number = true
-vim.o.relativenumber = true
-
-vim.o.hlsearch = true
-vim.o.incsearch = true
-vim.o.ignorecase = true
-vim.o.smartcase = true
-vim.o.showmatch = true
-
-vim.o.wrap = false
-vim.o.swapfile = false
-
-vim.o.tabstop = 4
-vim.o.softtabstop = 4
-vim.o.shiftwidth = 4
-vim.o.expandtab = true
-
-vim.o.undofile = true
-
-vim.splitright = true
-vim.splitbelow = true
-
-vim.o.list = true
-vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
-
-vim.o.cursorline = true
-vim.o.scrolloff = 10
-vim.o.signcolumn = "yes"
-vim.o.winborder = "rounded"
-
-
-vim.opt.fillchars = {
-  vert = '┃',      -- Vertical split
-  horiz = '━',     -- Horizontal split
-}
+vim.diagnostic.config({
+    virtual_text = {
+        prefix = "",
+    },
+    signs = true,
+    underline = true,
+    update_in_insert = false,
+    severity_sort = true,
+})
 
 vim.pack.add({
     { src = 'https://github.com/NMAC427/guess-indent.nvim' },
@@ -45,6 +20,12 @@ vim.pack.add({
     { src = 'https://github.com/stevearc/oil.nvim' },
     { src = 'https://github.com/nvim-lua/plenary.nvim' },
     { src = 'https://github.com/CopilotC-Nvim/CopilotChat.nvim' },
+    { src = 'https://github.com/github/copilot.vim' },
+    { src = 'https://github.com/tree-sitter-grammars/tree-sitter-markdown' },
+    { src = 'https://github.com/MeanderingProgrammer/render-markdown.nvim' },
+    { src = 'https://github.com/ThePrimeagen/vim-be-good' },
+    { src = 'https://github.com/Saghen/blink.cmp' },
+    { src = 'https://github.com/rafamadriz/friendly-snippets' },
 })
 require("mini.pick").setup()
 require("gitsigns").setup({
@@ -56,14 +37,27 @@ require("gitsigns").setup({
         changedelete = { text = '~' },
     },
 })
-require("oil").setup()
+require("oil").setup({
+    columns = { "icon" },
+    win_options = {
+        wrap = false,
+        number = false,
+        relativenumber = false,
+        signcolumn = "no",
+        cursorline = true,
+    },
+    view_options = { show_hidden = true },
+})
 require("CopilotChat").setup({
+    dependencies = {
+        'Copilot.vim',
+        'render-markdown.nvim',
+    },
     window = {
         layout = 'vertical',
-        width = 0.3,        -- Fixed width in columns
-        border = 'rounded', -- 'single', 'double', 'rounded', 'solid'
+        width = 0.3,
+        border = 'rounded',
         title = 'Copilot Chat',
-        col = 'right',
     },
     headers = {
         user = '  User ',
@@ -76,44 +70,93 @@ require("CopilotChat").setup({
     separator = '━━',
     show_folds = false,
 })
-vim.ui.select = require('mini.pick').ui_select
+vim.api.nvim_create_autocmd("BufEnter", {
+    pattern = { "copilot-chat", "nvim-pack://6/confirm-update" },
+    callback = function()
+        vim.bo.filetype = "markdown"
+        vim.opt_local.number = false
+        vim.opt_local.relativenumber = false
+        -- vim.cmd("wincmd L")
+        -- vim.cmd("vertical resize 50")
+    end,
+})
 
-vim.lsp.config('css_ls', { cmd = "vscode-css-language-server" })
-vim.lsp.config('eslint_ls', { cmd = "vscode-eslint-language-server" })
-vim.lsp.config('html_ls', { cmd = "vscode-eslint-language-server" })
-vim.lsp.config('json_ls', { cmd = "vscode-json-language-server" })
-vim.lsp.config('markdown_ls', { cmd = "vscode-markdown-language-server" })
-vim.lsp.enable({
+vim.ui.select = require('mini.pick').ui_select
+require('render-markdown').setup({
+    completions = { lsp = { enabled = true } },
+    file_types = { "markdown", "copilot-chat", "nvim-pack://6/confirm-update" },
+})
+require('blink.cmp').setup({
+    keymap = { preset = 'default' },
+    completion = { documentation = { auto_show = true } },
+    fuzzy = { implementation = "lua" },
+    signature = { enabled = true },
+})
+
+vim.lsp.config["markdownls"] = {
+    cmd = { "vscode-markdown-language-server", "--stdio" },
+    filetypes = { "markdown" },
+    root_dir = require('lspconfig.util').root_pattern(".marksman.toml", "package.json", ".git"),
+}
+local servers = {
     "lua_ls", "ts_ls", "tailwindcss", "pyright",
-    "css_ls", "eslint_ls", "html_ls", "json_ls", "markdown_ls",
-})
-vim.api.nvim_create_autocmd("LspAttach", {
-    callback = function(ev)
-        local client = vim.lsp.get_client_by_id(ev.data.client_id)
-        if client:supports_method("textDocument/completion") then
-            vim.lsp.completion.enable(
-                true, client.id, ev.buf,
-                { autotrigger = true })
-        end
+    "cssls", "eslint", "html", "jsonls", "markdownls",
+}
+vim.lsp.enable(servers)
+require'lspconfig'.lua_ls.setup {
+  on_init = function(client)
+    local path = client.workspace_folders[1].name
+    if vim.loop.fs_stat(path..'/.luarc.json') or vim.loop.fs_stat(path..'/.luarc.jsonc') then
+      return
     end
-})
-vim.cmd("set completeopt+=noselect")
+
+    client.config.settings.Lua = vim.tbl_deep_extend('force', client.config.settings.Lua, {
+      runtime = {
+        version = 'LuaJIT'
+      },
+      workspace = {
+        checkThirdParty = false,
+        -- library = {
+        --   vim.env.VIMRUNTIME,
+        --   "${3rd}/luv/library",
+        --   "${3rd}/busted/library",
+        -- }
+        -- or pull in all of 'runtimepath'. NOTE: this is a lot slower
+        library = vim.api.nvim_get_runtime_file("", true)
+      }
+    })
+  end,
+  settings = {
+    Lua = {}
+  }
+}
+for _, server in pairs(servers) do
+    require('lspconfig')[server].setup({
+        capabilities = require('blink.cmp').get_lsp_capabilities()
+    })
+end
 
 vim.cmd("colorscheme tokyonight-night")
 
-vim.keymap.set("n", "<Esc>", ":nohlsearch<CR>")
+vim.keymap.set("n", "<leader>e", ":Oil<CR>")
+
 vim.keymap.set({ "n", "v", "x" }, "<leader>w", "<Esc>:update<CR>")
 vim.keymap.set({ "n", "v", "x" }, "<leader>s", "<esc> :update<CR> :source<CR>")
-vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
-vim.keymap.set("n", "<leader>sf", ":Pick files<CR>")
-vim.keymap.set("n", "<leader>sw", ":Pick grep_live<CR>")
-vim.keymap.set("n", "<leader>h", ":Pick help<CR>")
-vim.keymap.set("n", "<leader>f", vim.lsp.buf.format)
-vim.keymap.set("n", "<leader>e", ":Oil<CR>")
-vim.keymap.set("n", "<leader>c", ":CopilotChatToggle<CR>",
-    { silent = true, desc = "Open Copilot Chat" })
+
+vim.keymap.set("n", "<leader>ff", ":Pick files<CR>")
+vim.keymap.set("n", "<leader>fw", ":Pick grep_live<CR>")
+vim.keymap.set("n", "<leader>fh", ":Pick help<CR>")
+
+vim.keymap.set("n", "<leader>cc", ":CopilotChatToggle<CR>")
+vim.keymap.set("v", "<leader>ce", ":CopilotChatExplain<CR>")
+vim.keymap.set("v", "<leader>co", ":CopilotChatOptimize<CR>")
+vim.keymap.set("v", "<leader>cf", ":CopilotChatFix<CR>")
+vim.keymap.set("v", "<leader>cs", ":CopilotChatSave<CR>")
+vim.keymap.set("v", "<leader>cl", ":CopilotChatLoad<CR>")
 
 vim.keymap.set("n", "<leader>gd", vim.lsp.buf.definition, { desc = "Go to [D]efinition" })
 vim.keymap.set("n", "<leader>gi", vim.lsp.buf.implementation, { desc = "Go to [I]mplementation" })
 vim.keymap.set("n", "<leader>gr", vim.lsp.buf.references, { desc = "[R]eferences" })
 vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { desc = "[R]e[n]ame" })
+vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+vim.keymap.set("n", "<leader>f", vim.lsp.buf.format)
