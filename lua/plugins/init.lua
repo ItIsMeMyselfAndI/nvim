@@ -12,4 +12,6 @@ vim.pack.add({
     { src = 'https://github.com/ThePrimeagen/vim-be-good' },
     { src = 'https://github.com/Saghen/blink.cmp' },
     { src = 'https://github.com/rafamadriz/friendly-snippets' },
+    { src = 'https://github.com/nvim-treesitter/nvim-treesitter' },
+    { src = 'https://github.com/windwp/nvim-ts-autotag' },
 })

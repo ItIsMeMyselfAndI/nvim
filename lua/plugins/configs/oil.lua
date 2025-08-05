@@ -10,3 +10,8 @@ require("oil").setup({
     view_options = { show_hidden = true },
 })
 
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = "oil",
+    callback = function()
+    end,
+})
