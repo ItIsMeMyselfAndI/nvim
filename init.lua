@@ -41,7 +41,7 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
     if vim.v.shell_error ~= 0 then
         vim.api.nvim_echo({
             { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-            { out, "WarningMsg" },
+            { out,                            "WarningMsg" },
             { "\nPress any key to exit..." },
         }, true, {})
         vim.fn.getchar()
@@ -57,7 +57,7 @@ local plugins = {
         priority = 1000,
         opts = {},
         config = function()
-            vim.cmd[[colorscheme tokyonight-night]]
+            vim.cmd [[colorscheme tokyonight-night]]
         end
     },
     {
@@ -141,10 +141,15 @@ local plugins = {
         version = '1.*',
         opts = {
             keymap = { preset = 'default' },
-            completion = { documentation = { auto_show = true } },
-            sources = {
-                fuzzy = { implementation = "prefer_rust_with_warning" }
+            completion = {
+                documentation = {
+                    auto_show = true
+                }
             },
+            fuzzy = { implementation = "prefer_rust_with_warning" },
+            -- sources = {
+            --     default = { 'lsp', 'path', 'snippets', 'buffer' },
+            -- },
         },
     },
     {
@@ -164,8 +169,8 @@ local plugins = {
                         },
                         workspace = {
                             checkThirdParty = false,
-                            -- library = { vim.env.VIMRUNTIME }
-                            library = vim.api.nvim_get_runtime_file("", true),
+                            library = { vim.env.VIMRUNTIME }
+                            -- library = vim.api.nvim_get_runtime_file("", true),
                         },
                     },
                 },
@@ -176,6 +181,7 @@ local plugins = {
         "CopilotC-Nvim/CopilotChat.nvim",
         dependencies = {
             { "nvim-lua/plenary.nvim", branch = "master" },
+            { "github/copilot.vim" }
         },
         build = "make tiktoken",
         config = function()
@@ -199,6 +205,23 @@ local plugins = {
             })
         end
     },
+    {
+        "windwp/nvim-ts-autotag",
+        dependencies = { "nvim-treesitter/nvim-treesitter" },
+        ft = {
+            "html",
+            "javascript",
+            "typescript",
+            "javascriptreact",
+            "typescriptreact",
+            "vue",
+            "svelte",
+            "xml"
+        },
+        config = function()
+            require("nvim-ts-autotag").setup()
+        end,
+    },
 }
 
 require("lazy").setup({
@@ -210,7 +233,6 @@ require("lazy").setup({
     checker = { enabled = true },
 })
 
-local win = "copilot-chat"
 local function get_filename()
     local project_dir = vim.fn.expand('%:p:h')
     if project_dir == "/" then
@@ -226,23 +248,13 @@ local function get_filename()
 end
 local function save_convo()
     local filename = get_filename()
-    if vim.bo.filetype == win then
+    if vim.bo.filetype == "copilot-chat" then
         vim.cmd("CopilotChatSave " .. filename)
     end
 end
-local function load_convo()
-    vim.defer_fn(function()
-        if vim.bo.filetype == win then
-            local filename = get_filename()
-            local cmd = "CopilotChatLoad " .. filename
-            vim.notify(":" .. cmd, vim.log.levels.INFO)
-            vim.cmd(cmd)
-        end
-    end, 3000)
-end
 vim.api.nvim_create_autocmd(
     { 'ModeChanged' },
-    { pattern = "i:*", callback = save_convo }
+    { pattern = { "i:*", "*:n" }, callback = save_convo }
 )
 vim.api.nvim_create_autocmd(
     {
@@ -252,8 +264,22 @@ vim.api.nvim_create_autocmd(
     },
     { callback = save_convo }
 )
-vim.api.nvim_create_autocmd(
-    { 'BufWinEnter',},
-    { callback = load_convo }
-)
+
 vim.lsp.enable(SERVERS)
+
+-- oil
+vim.keymap.set("n", "<leader>e", ":Oil<CR>")
+-- lsp
+vim.keymap.set("n", "<leader>gd", vim.lsp.buf.definition)
+vim.keymap.set("n", "<leader>gi", vim.lsp.buf.implementation)
+vim.keymap.set("n", "<leader>gr", vim.lsp.buf.references)
+vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename)
+vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist)
+vim.keymap.set("n", "<leader>=", vim.lsp.buf.format)
+-- copilot chat
+vim.keymap.set("n", "<leader>cc", ":CopilotChatToggle<CR>")
+vim.keymap.set("v", "<leader>ce", ":CopilotChatExplain<CR>")
+vim.keymap.set("v", "<leader>co", ":CopilotChatOptimize<CR>")
+vim.keymap.set("v", "<leader>cf", ":CopilotChatFix<CR>")
+vim.keymap.set("n", "<leader>cs", ":CopilotChatSave ")
+vim.keymap.set("n", "<leader>cl", ":CopilotChatLoad ")
