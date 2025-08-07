@@ -1,0 +1,10 @@
+- autotag.lua
+- blink.lua
+- copilot-chat.lua
+- gitsign.lua
+- guess-indent.lua
+- mini-pick.lua
+- oil.lua
+- render-markdown.lua
+- tokyonight.lua
+- treesitter.lua

@@ -1,10 +1,16 @@
 vim.g.mapleader = " "
 
-SERVERS = { "lua_ls", "ts_ls", "tailwindcss", "cssls", "html", "markdown_oxide", "pyright", "zk", "eslint" }
+SERVERS = {
+    "lua_ls", "ts_ls", "tailwindcss", "pyright",
+    "cssls", "eslint", "html", "jsonls", "markdownls",
+}
 
-require("config.lazy")
+require("plugins")
+require("plugins.configs")
 require("config.options")
 require("config.keymaps")
+
+vim.lsp.enable(SERVERS)
 
 vim.diagnostic.config({
     virtual_text = {
@@ -16,37 +22,16 @@ vim.diagnostic.config({
     severity_sort = true,
 })
 
-local function get_filename()
-    local project_dir = vim.fn.expand('%:p:h')
-    if project_dir == "/" then
-        project_dir = "_"
-    elseif project_dir == "" then
-        project_dir = "unknown"
-    end
-    local filename = string.gsub(project_dir, "/", "_")
-    if filename == "" or "/" then
-        filename = "_"
-    end
-    return filename
-end
-local function save_convo()
-    local filename = get_filename()
-    if vim.bo.filetype == "copilot-chat" then
-        vim.cmd("CopilotChatSave " .. filename)
-    end
-end
-vim.api.nvim_create_autocmd(
-    { 'ModeChanged' },
-    { pattern = { "*:n" }, callback = save_convo }
-)
-vim.api.nvim_create_autocmd(
-    {
-        'QuitPre', 'ExitPre', 'VimLeavePre',
-        'WinClosed', 'TabClosed', 'BufDelete',
-        'SourcePre', 'BufWritePost'
-    },
-    { callback = save_convo }
-)
+vim.api.nvim_create_autocmd("BufEnter", {
+    pattern = { "copilot-chat", "nvim-pack://6/confirm-update" },
+    callback = function()
+        vim.bo.filetype = "markdown"
+        vim.opt_local.number = false
+        vim.opt_local.relativenumber = false
+        -- vim.cmd("wincmd L")
+        -- vim.cmd("vertical resize 50")
+    end,
+})
 
--- only when automatic installation is off
--- vim.lsp.enable(SERVERS)
+vim.keymap.set("n", "<leader>w", ":w<CR>")
+vim.keymap.set("n", "<leader>s", ":w<CR> :so<CR>")

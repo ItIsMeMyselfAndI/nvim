@@ -28,3 +28,6 @@ vim.o.cursorline = true
 vim.o.scrolloff = 10
 vim.o.signcolumn = "yes"
 vim.o.winborder = "rounded"
+
+
+
