@@ -36,6 +36,9 @@ return {
     },
     config = function(_, opts)
         require("mason").setup()
+        require("mason-lspconfig").setup({
+            ensure_installed = SERVERS,
+        })
         for server, config in pairs(opts.servers) do
             config.capabilities = require('blink.cmp').get_lsp_capabilities(config.capabilities)
             config.on_attach = function(client, bufnr)
@@ -43,9 +46,5 @@ return {
             end
             require('lspconfig')[server].setup(config)
         end
-        require("mason-lspconfig").setup({
-            ensure_installed = SERVERS,
-            automatic_installation = true,
-        })
     end
 }

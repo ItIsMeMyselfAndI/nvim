@@ -2,9 +2,11 @@ vim.g.mapleader = " "
 
 SERVERS = { "lua_ls", "ts_ls", "tailwindcss", "cssls", "html", "markdown_oxide", "pyright", "zk", "eslint" }
 
-require("config.lazy")
 require("config.options")
+require("config.lazy")
 require("config.keymaps")
+
+vim.lsp.enable(SERVERS)
 
 vim.diagnostic.config({
     virtual_text = {
@@ -47,6 +49,3 @@ vim.api.nvim_create_autocmd(
     },
     { callback = save_convo }
 )
-
--- only when automatic installation is off
--- vim.lsp.enable(SERVERS)
