@@ -33,6 +33,16 @@ vim.o.scrolloff = 10
 vim.o.signcolumn = "yes"
 vim.o.winborder = "rounded"
 
+vim.diagnostic.config({
+    virtual_text = {
+        prefix = "",
+    },
+    signs = true,
+    underline = true,
+    update_in_insert = true,
+    severity_sort = true,
+})
+
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
@@ -128,53 +138,71 @@ local plugins = {
         end
     },
     {
-        "mason-org/mason.nvim",
-        config = function()
-            require("mason").setup({
-                ensure_intalled = SERVERS
-            })
-        end
-    },
-    {
         'saghen/blink.cmp',
         dependencies = { 'rafamadriz/friendly-snippets' },
         version = '1.*',
         opts = {
-            keymap = { preset = 'default' },
+            keymap = {
+                preset = 'default',
+            },
             completion = {
                 documentation = {
                     auto_show = true
                 }
             },
             fuzzy = { implementation = "prefer_rust_with_warning" },
-            -- sources = {
-            --     default = { 'lsp', 'path', 'snippets', 'buffer' },
-            -- },
+            sources = {
+                default = { 'lsp', 'path', 'snippets', 'buffer' },
+            },
+            opts_extend = { "sources.default" }
         },
     },
     {
-        'neovim/nvim-lspconfig',
-        dependencies = { 'saghen/blink.cmp' },
-        config = function()
-            for _, server in pairs(SERVERS) do
-                require('lspconfig')[server].setup({
-                    capabilities = require('blink.cmp').get_lsp_capabilities()
-                })
-            end
-            require("lspconfig").lua_ls.setup({
-                settings = {
-                    Lua = {
-                        diagnostics = {
-                            globals = { "vim" },
-                        },
-                        workspace = {
-                            checkThirdParty = false,
-                            library = { vim.env.VIMRUNTIME }
-                            -- library = vim.api.nvim_get_runtime_file("", true),
+        "mason-org/mason.nvim",
+        dependencies = {
+            {
+                'neovim/nvim-lspconfig',
+                dependencies = { 'saghen/blink.cmp' },
+            },
+            { "artemave/workspace-diagnostics.nvim" },
+        },
+        opts = {
+            servers = {
+                lua_ls = {
+                    settings = {
+                        Lua = {
+                            diagnostics = {
+                                globals = { "vim" },
+                            },
+                            workspace = {
+                                checkThirdParty = false,
+                                library = { vim.env.VIMRUNTIME }
+                                -- library = vim.api.nvim_get_runtime_file("", true),
+                            },
                         },
                     },
                 },
+                ts_ls = {},
+                tailwindcss = {},
+                cssls = {},
+                html = {},
+                markdown_oxide = {},
+                pyright = {},
+                zk = {},
+                eslint = {},
+            },
+        },
+        config = function(_, opts)
+            require("mason").setup({
+                ensure_installed = SERVERS
             })
+            for server, config in pairs(opts.servers) do
+                config.capabilities = require('blink.cmp').get_lsp_capabilities(config.capabilities)
+                config.on_attach = function(client, bufnr)
+                    require("workspace-diagnostics").populate_workspace_diagnostics(client, bufnr)
+                end
+                require('lspconfig')[server].setup(config)
+            end
         end
     },
     {
@@ -222,6 +250,53 @@ local plugins = {
             require("nvim-ts-autotag").setup()
         end,
     },
+    {
+        'stevearc/conform.nvim',
+        config = function()
+            require("conform").setup({
+                formatters_by_ft = {
+                    lua = { "stylua" },
+                    python = { "isort", "black" },
+                    rust = { "rustfmt", lsp_format = "fallback" },
+                    javascript = { "prettierd", "prettier", stop_after_first = true },
+                    javascriptreact = { "prettierd", "prettier", stop_after_first = true },
+                    typescript = { "prettierd", "prettier", stop_after_first = true },
+                    typescriptreact = { "prettierd", "prettier", stop_after_first = true },
+                    json = { "prettierd", "prettier", stop_after_first = true },
+                    postgresql = { "prettierd", "prettier", stop_after_first = true },
+                    sql = { "prettierd", "prettier", stop_after_first = true },
+                    css = { "prettierd", "prettier", stop_after_first = true },
+                    html = { "prettierd", "prettier", stop_after_first = true },
+                },
+                format_on_save = {
+                    timeout_ms = 500,
+                    lsp_format = "fallback",
+                },
+            })
+        end
+    },
+    {
+        "nvim-lualine/lualine.nvim",
+        dependencies = { "nvim-tree/nvim-web-devicons" },
+        config = function()
+            require("lualine").setup({
+                options = {
+                    theme = "tokyonight-night",
+                },
+            })
+        end
+    },
+    {
+        "folke/which-key.nvim",
+        opts = {},
+        config = function()
+            require("which-key").setup({
+                plugins = {
+                    spelling = { enabled = true },
+                },
+            })
+        end
+    },
 }
 
 require("lazy").setup({
@@ -267,6 +342,7 @@ vim.api.nvim_create_autocmd(
 
 vim.lsp.enable(SERVERS)
 
+vim.keymap.set("n", "<C-v>", "<C-v>", { noremap = true, remap = false })
 -- oil
 vim.keymap.set("n", "<leader>e", ":Oil<CR>")
 -- lsp
