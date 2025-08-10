@@ -16,37 +16,39 @@ vim.diagnostic.config({
     severity_sort = true,
 })
 
-local function get_filename()
-    local project_dir = vim.fn.expand('%:p:h')
-    if project_dir == "/" then
-        project_dir = "_"
-    elseif project_dir == "" then
-        project_dir = "unknown"
-    end
-    local filename = string.gsub(project_dir, "/", "_")
-    if filename == "" or "/" then
-        filename = "_"
-    end
-    return filename
-end
-local function save_convo()
-    local filename = get_filename()
-    if vim.bo.filetype == "copilot-chat" then
-        vim.cmd("CopilotChatSave " .. filename)
-    end
-end
-vim.api.nvim_create_autocmd(
-    { 'ModeChanged' },
-    { pattern = { "*:n" }, callback = save_convo }
-)
-vim.api.nvim_create_autocmd(
-    {
-        'QuitPre', 'ExitPre', 'VimLeavePre',
-        'WinClosed', 'TabClosed', 'BufDelete',
-        'SourcePre', 'BufWritePost'
-    },
-    { callback = save_convo }
-)
+vim.keymap.set("n", "<C-j>", "o<Esc>", { silent = true, desc = "Insert new line below" })
+
+-- local function get_filename()
+--     local project_dir = vim.fn.expand('%:p:h')
+--     if project_dir == "/" then
+--         project_dir = "_"
+--     elseif project_dir == "" then
+--         project_dir = "unknown"
+--     end
+--     local filename = string.gsub(project_dir, "/", "_")
+--     if filename == "" or "/" then
+--         filename = "_"
+--     end
+--     return filename
+-- end
+-- local function save_convo()
+--     local filename = get_filename()
+--     if vim.bo.filetype == "copilot-chat" then
+--         vim.cmd("CopilotChatSave " .. filename)
+--     end
+-- end
+-- vim.api.nvim_create_autocmd(
+--     { 'ModeChanged' },
+--     { pattern = { "*:n" }, callback = save_convo }
+-- )
+-- vim.api.nvim_create_autocmd(
+--     {
+--         'QuitPre', 'ExitPre', 'VimLeavePre',
+--         'WinClosed', 'TabClosed', 'BufDelete',
+--         'SourcePre', 'BufWritePost'
+--     },
+--     { callback = save_convo }
+-- )
 
 -- only when automatic installation is off
 -- vim.lsp.enable(SERVERS)
