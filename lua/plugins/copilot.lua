@@ -2,7 +2,7 @@ return {
     "CopilotC-Nvim/CopilotChat.nvim",
     dependencies = {
         { "nvim-lua/plenary.nvim", branch = "master" },
-        { "github/copilot.vim" }
+        { "github/copilot.vim" },
     },
     build = "make tiktoken",
     config = function()
@@ -24,5 +24,14 @@ return {
             separator = '━━',
             show_folds = false,
         })
+        vim.g.copilot_no_tab_map = true
+        vim.keymap.set('i',
+            '<S-Tab>',
+            'copilot#Accept("\\<S-Tab>")',
+            {
+                expr = true,
+                replace_keycodes = false
+            }
+        )
     end
 }

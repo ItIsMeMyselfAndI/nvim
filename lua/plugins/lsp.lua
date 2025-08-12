@@ -25,6 +25,7 @@ return {
                 },
             },
             ts_ls = {},
+            jsonls = {},
             tailwindcss = {},
             cssls = {},
             html = {},
