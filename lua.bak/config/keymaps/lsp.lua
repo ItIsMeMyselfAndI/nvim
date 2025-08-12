@@ -1,6 +1,0 @@
-vim.keymap.set("n", "<leader>gd", vim.lsp.buf.definition, { desc = "Go to [D]efinition" })
-vim.keymap.set("n", "<leader>gi", vim.lsp.buf.implementation, { desc = "Go to [I]mplementation" })
-vim.keymap.set("n", "<leader>gr", vim.lsp.buf.references, { desc = "[R]eferences" })
-vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { desc = "[R]e[n]ame" })
-vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
-vim.keymap.set("n", "<leader>f", vim.lsp.buf.format)
