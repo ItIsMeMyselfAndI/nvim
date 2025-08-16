@@ -1,0 +1,16 @@
+- autotag.luag
+- copilot.luag
+- lsp.luag
+- render-markdown.luag
+- treesitter.luag
+- workspace-diagnostics.lua
+- blink.luag
+- fidget.luag
+- nvim-highlight-colors.luag
+- telescope.luag
+- trouble.luag
+- conform.luag
+- gitsigns.luag
+- oil.luag
+- tokyonight.luag
+- which-keys.luag
