@@ -9,10 +9,11 @@ return {
         keymap = {
             preset = 'default',
         },
+        columns = { "kind_icon", "label", "label_detail", "source_name", gap = 1 },
         completion = {
             documentation = {
                 auto_show = true
-            }
+            },
         },
         fuzzy = { implementation = "prefer_rust_with_warning" },
         sources = {
@@ -23,10 +24,23 @@ return {
     config = function()
         require("blink.cmp").setup {
             completion = {
+                ghost_text = { enabled = true, },
                 menu = {
                     draw = {
+                        columns = {
+                            { "kind_icon", "label",       "label_description", gap = 1 },
+                            { "kind",      "source_name", gap = 1 },
+                        },
                         components = {
                             -- customize the drawing of kind icons
+                            label_description = {
+                                width = { max = 50 },
+                            },
+                            source_name = {
+                                text = function(ctx)
+                                    return "[" .. ctx.source_name .. "]"
+                                end,
+                            },
                             kind_icon = {
                                 text = function(ctx)
                                     -- default kind icon

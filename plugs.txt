@@ -1,16 +1,3 @@
-- autotag.luag
-- copilot.luag
-- lsp.luag
-- render-markdown.luag
-- treesitter.luag
-- workspace-diagnostics.lua
-- blink.luag
-- fidget.luag
-- nvim-highlight-colors.luag
-- telescope.luag
-- trouble.luag
-- conform.luag
-- gitsigns.luag
-- oil.luag
-- tokyonight.luag
-- which-keys.luag
+autotag.lua  copilot.lua   lsp.lua                    render-markdown.lua  treesitter.lua  workspace-diagnostics.lua
+blink.lua    fidget.lua    nvim-highlight-colors.lua  telescope.lua        trouble.lua     
+conform.lua  gitsigns.lua  oil.lua                    tokyonight.lua       which-keys.lua  
